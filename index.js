@@ -7,11 +7,12 @@ const cors = require('cors')
 const app = express()
 app.use(cors())
 
-const url = "https://www.igfm.sn/"
-const url2 = "https://2stv.net"
-const url3 = "http://www.walf-groupe.com"
-const url4 = "https://www.senenews.com/"
-const articles = []
+const urls = {
+    "tfm": "https://www.igfm.sn/",
+    "2s": "https://2stv.net",
+    "walf": "http://www.walf-groupe.com",
+    "senenews": "https://www.senenews.com/"
+}
 const tfm = []
 const _2s = []
 const walf = []
@@ -23,52 +24,40 @@ const all = {
     "senenews": []
 }
 
-app.get("/senenews", (req, res) => {
-    axios(url4)
+function getTfmNews() {
+    axios(urls.tfm)
     .then(response => {
         const html = response.data
         const $ = cheerio.load(html)
-        $('a.secondUneFloat', html).each(
-            function () {
-                const post_url = $(this).attr('href')
-                const title = $(this)
-                    .find('div.secondUneHome')
-                    .find('img.imgSecondUneHome').attr('alt')
-                articles.push({
-                    title,
-                    post_url
-                })
+        $('a:has(p.small_title)', html).each(
+            function() {
+                const post_url = `${urls.tfm + $(this).attr('href')}`
+                const title = $(this).find('p.small_title').text()
+                const image = `${urls.tfm + $(this)
+                    .find('p.small_title')
+                    .parent()
+                    .closest('div')
+                    .parent()
+                    .find('> div')
+                    .attr('style')
+                    .match(/\((.*)\)/gi)[0]
+                    .replaceAll('(', '')
+                    .replaceAll("'", '')
+                    .replaceAll(')', '')}`
+                if (image.startsWith(`${urls.tfm}..`)){
+                    tfm.push({
+                        title,
+                        image,
+                        post_url
+                    })
+                }
             }
         )
     }).catch((error) => console.log(error))
-    res.json(articles)
-})
+}
 
-app.get("/walf", (req, res) => {
-    axios(url3)
-    .then(response => {
-        const html = response.data
-        const $ = cheerio.load(html)
-        $('figure.mh-custom-posts-thumb', html).each(
-            function () {
-                const post_url = $(this).find('a').attr('href')
-                const title = $(this).find('a').attr('title')
-                const image = $(this)
-                    .find('a')
-                    .find('img')
-                    .attr('src')
-                articles.push({
-                    title,
-                    image,
-                    post_url
-                })
-            }
-        )
-    }).catch((error) => console.log(error))
-    res.json(articles)
-})
-app.get("/2s", (req, res) => {
-    axios(url2)
+function get2sNews() {
+    axios(urls["2s"])
     .then(response => {
         const html = response.data
         const $ = cheerio.load(html)
@@ -80,7 +69,7 @@ app.get("/2s", (req, res) => {
                     .find('a')
                     .find('img')
                     .attr('src')
-                articles.push({
+                _2s.push({
                     title,
                     image,
                     post_url
@@ -88,134 +77,86 @@ app.get("/2s", (req, res) => {
             }
         )
     }).catch((error) => console.log(error))
-    res.json(articles)
-})
+}
 
-app.get("/tfm", (req, res) => {
-    axios(url)
+function getWalfNews() {
+    axios(urls.walf)
     .then(response => {
         const html = response.data
         const $ = cheerio.load(html)
-        $('a:has(p.small_title)', html).each(
-            function() {
-                const post_url = `${url + $(this).attr('href')}`
-                const title = $(this).find('p.small_title').text()
-                const image = `${url + $(this)
-                    .find('p.small_title')
-                    .parent()
-                    .closest('div')
-                    .parent()
-                    .find('> div')
-                    .attr('style')
-                    .match(/\((.*)\)/gi)[0]
-                    .replaceAll('(', '')
-                    .replaceAll("'", '')
-                    .replaceAll(')', '')}`
-                if (image.startsWith(`${url}..`)){
-                    articles.push({
-                        title,
-                        image,
-                        post_url
-                    })
-                }
+        $('figure.mh-custom-posts-thumb', html).each(
+            function () {
+                const post_url = $(this).find('a').attr('href')
+                const title = $(this).find('a').attr('title')
+                const image = $(this)
+                    .find('a')
+                    .find('img')
+                    .attr('src')
+                walf.push({
+                    title,
+                    image,
+                    post_url
+                })
             }
         )
     }).catch((error) => console.log(error))
-    res.json(articles)
-})
+}
+
+function getSeneNews() {
+    axios(urls["senenews"])
+    .then(response => {
+        const html = response.data
+        const $ = cheerio.load(html)
+        $('a.secondUneFloat', html).each(
+            function () {
+                const post_url = $(this).attr('href')
+                const title = $(this)
+                    .find('div.secondUneHome')
+                    .find('img.imgSecondUneHome').attr('alt')
+                senenews.push({
+                    title,
+                    post_url
+                })
+            }
+        )
+    }).catch((error) => console.log(error))
+}
 
 app.get("/all", (req, res) => {
-    axios(url)
-    .then(response => {
-        const html = response.data
-        const $ = cheerio.load(html)
-        $('a:has(p.small_title)', html).each(
-            function() {
-                const post_url = `${url + $(this).attr('href')}`
-                const title = $(this).find('p.small_title').text()
-                const image = `${url + $(this)
-                    .find('p.small_title')
-                    .parent()
-                    .closest('div')
-                    .parent()
-                    .find('> div')
-                    .attr('style')
-                    .match(/\((.*)\)/gi)[0]
-                    .replaceAll('(', '')
-                    .replaceAll("'", '')
-                    .replaceAll(')', '')}`
-                if (image.startsWith(`${url}..`)){
-                    tfm.push({
-                        title,
-                        image,
-                        post_url
-                    })
-                }
-            }
-        )
-        axios(url2)
-        .then(response => {
-            const html = response.data
-            const $ = cheerio.load(html)
-            $('figure.mh-posts-grid-thumb', html).each(
-                function () {
-                    const post_url = $(this).find('a').attr('href')
-                    const title = $(this).find('a').attr('title')
-                    const image = $(this)
-                        .find('a')
-                        .find('img')
-                        .attr('src')
-                    _2s.push({
-                        title,
-                        image,
-                        post_url
-                    })
-                }
-            )
-            axios(url3)
-            .then(response => {
-                const html = response.data
-                const $ = cheerio.load(html)
-                $('figure.mh-custom-posts-thumb', html).each(
-                    function () {
-                        const post_url = $(this).find('a').attr('href')
-                        const title = $(this).find('a').attr('title')
-                        const image = $(this)
-                            .find('a')
-                            .find('img')
-                            .attr('src')
-                        walf.push({
-                            title,
-                            image,
-                            post_url
-                        })
-                    }
-                )
-                axios(url4)
-                .then(response => {
-                    const html = response.data
-                    const $ = cheerio.load(html)
-                    $('a.secondUneFloat', html).each(
-                        function () {
-                            const post_url = $(this).attr('href')
-                            const title = $(this)
-                                .find('div.secondUneHome')
-                                .find('img.imgSecondUneHome').attr('alt')
-                            senenews.push({
-                                title,
-                                post_url
-                            })
-                        }
-                    )
-                }).catch((error) => console.log(error))
-            }).catch((error) => console.log(error))
-        }).catch((error) => console.log(error))
-    }).catch((error) => console.log(error))
-    all.tfm = [...tfm]
-    all['2s'] = [..._2s]
-    all.walf = [...walf]
-    all.senenews = [...senenews]
-    res.json(all)
+    if (req.query.tv) {
+        let response = []
+        switch (req.query.tv) {
+            case "senenews":
+                getSeneNews()
+                response = [...senenews]
+                break
+            case "tfm":
+                getTfmNews()
+                response = [...tfm]
+                break
+            case "walf":
+                getWalfNews()
+                response = [...walf]
+                break
+            case "2s":
+                get2sNews()
+                response = [..._2s]
+                break
+            default:
+                res.send('invalid tv name')
+        }
+        res.json(response)
+    } else {
+        getTfmNews()
+        get2sNews()
+        getWalfNews()
+        getSeneNews()              
+        all.tfm = [...tfm]
+        all['2s'] = [..._2s]
+        all.walf = [...walf]
+        all.senenews = [...senenews]
+        res.json(all)
+    }
 })
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
