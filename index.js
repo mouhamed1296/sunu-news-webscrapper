@@ -122,6 +122,10 @@ function getSeneNews() {
     }).catch((error) => console.log(error))
 }
 
+app.get("/", (req, res) => {
+    res.send('Welcome to sunu-news-scrapper Api')
+})
+
 app.get("/all", (req, res) => {
     if (req.query.tv) {
         let response = []
