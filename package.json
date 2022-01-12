@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "\"A web scrapping app\"",
   "main": "index.js",
-  "repository": "https://github.com/mouhamed1296/samaCrapper",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mouhamed1296/samaCrapper.git"
+  },
   "author": "Mamadou Sarr",
   "license": "MIT",
   "private": true,
@@ -16,5 +19,14 @@
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "nodemon": "^2.0.15"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/mouhamed1296/samaCrapper/issues"
+  },
+  "homepage": "https://github.com/mouhamed1296/samaCrapper#readme",
+  "devDependencies": {},
+  "keywords": [
+    "news",
+    "webscrapper"
+  ]
 }
